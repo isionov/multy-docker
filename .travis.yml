@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t iliawebdev/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run iliawebdev/react-test npm run test
+
+after_success:
+  - docker build -t iliawebdev/multi-client ./client
+  - docker build -t iliawebdev/multi-nginx ./nginx
+  - docker build -t iliawebdev/multi-server ./server
+  - docker build -t iliawebdev/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push iliawebdev/multi-client
+  - docker push iliawebdev/multi-nginx
+  - docker push iliawebdev/multi-server
+  - docker push iliawebdev/multi-worker
